@@ -153,6 +153,7 @@ class SessionService {
     }
 
     public function createSession($identity) {
+        require_once("../config.php")
         $session = $this->generateRandomString();
 
         $csession = $this->con->prepare("INSERT into session (id, identity_id) values (?, ?);");
