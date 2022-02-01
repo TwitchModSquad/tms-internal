@@ -118,6 +118,7 @@ class IdentityService {
 
 class SessionService {
     private $con;
+    private $config;
     private $session = null;
 
     private function generateRandomString($n = 32) { 
@@ -132,8 +133,9 @@ class SessionService {
         return $randomString; 
     }
 
-    public function __construct($con) {
+    public function __construct($con, $config) {
         $this->con = $con;
+        $this->config = $config;
     }
 
     public function getSession() {
@@ -153,14 +155,13 @@ class SessionService {
     }
 
     public function createSession($identity) {
-        require_once("../config.php")
         $session = $this->generateRandomString();
 
         $csession = $this->con->prepare("INSERT into session (id, identity_id) values (?, ?);");
 
         $csession->execute(array($session, $identity));
 
-        setcookie("session", $session, time() + 60*60*24, "/", $config["uris"]["cookie"], true, false);
+        setcookie("session", $session, time() + 60*60*24, "/", $this->config["uris"]["cookie"], true, false);
     }
 }
 
@@ -174,7 +175,7 @@ try {
     $dus = new DiscordUserService($con);
     $tus = new TwitchUserService($con);
     $is = new IdentityService($con);
-    $ss = new SessionService($con);
+    $ss = new SessionService($con, $config);
 } catch (PDOException $e) {
     print "Error!: " . $e->getMessage() . "<br/>";
     die();
